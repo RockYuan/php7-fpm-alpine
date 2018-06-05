@@ -56,7 +56,9 @@ RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-png-dir=/usr --w
     
 RUN docker-php-ext-install gd pdo_mysql mysqli zip bcmath
 
-RUN docker-php-ext-install intl mcrypt opcache sockets iconv
+RUN docker-php-ext-install intl mcrypt opcache
+
+RUN sockets iconv
     
 RUN set -ex; \
     \
