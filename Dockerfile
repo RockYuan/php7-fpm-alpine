@@ -67,13 +67,11 @@ RUN set -ex; \
             | tr ',' '\n' \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-    )"
+    )"; \
+    \
+    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick
 
-RUN set -ex; \
-    \
-    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick; \
-    \
-    git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
+RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
     cd build; \
