@@ -45,10 +45,9 @@ RUN apk add --no-cache --virtual .build-deps \
         # for ...
         openssl-dev \
         libtool \
-        tzdata \
-    ; \
-    # for imagick
-    apk add imagemagick-dev --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted \
+        tzdata
+
+RUN apk add imagemagick-dev --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted \
     ; \
     \
     docker-php-ext-configure gd --with-freetype-dir=/usr --with-png-dir=/usr --with-jpeg-dir=/usr; \
