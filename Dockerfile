@@ -52,9 +52,9 @@ RUN apk add imagemagick-dev --update-cache --repository http://dl-cdn.alpinelinu
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-png-dir=/usr --with-jpeg-dir=/usr; \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql; \
     docker-php-ext-configure bcmath --enable-bcmath; \
-    docker-php-ext-configure intl --enable-intl; \
-    \
-    docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl mcrypt opcache sockets iconv
+    docker-php-ext-configure intl --enable-intl
+    
+RUN docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl mcrypt opcache sockets iconv
     
 RUN set -ex; \
     \
