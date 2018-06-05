@@ -24,10 +24,10 @@ ENV PHPIZE_DEPS \
     re2c
 
 # 安装需要的插件
-RUN set -ex; \
-    \
-    apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS \
+RUN set -ex
+
+RUN apk add --no-cache --virtual .build-deps \
+        ${PHPIZE_DEPS} \
         # for gd extension
         freetype-dev \
         libjpeg-turbo-dev \
