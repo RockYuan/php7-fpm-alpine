@@ -67,9 +67,9 @@ RUN set -ex; \
     \
     # 安装APCu
     pecl install apcu; \
-    docker-php-ext-enable apcu; \
-    \
-    git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
+    docker-php-ext-enable apcu
+    
+RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
     cd build; \
@@ -117,10 +117,7 @@ RUN set -ex; \
     docker-php-ext-configure /tmp/php-swoole; \
     docker-php-ext-install /tmp/php-swoole; \
     \
-    # iconv运行库
-    apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
-    \
-    # 开发环境启用xdebug,现网不需要
+    # 开发环境启用xdebug
     git clone --branch ${PHP_XDEBUG_VERSION} https://github.com/xdebug/xdebug.git /tmp/php-xdebug; \
     docker-php-ext-configure /tmp/php-xdebug; \
     docker-php-ext-install /tmp/php-xdebug; \
@@ -134,6 +131,7 @@ RUN set -ex; \
     # 建立默认工作目录
     mkdir -p /data
 
+RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Copy configuration
