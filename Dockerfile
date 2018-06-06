@@ -53,8 +53,6 @@ RUN set -ex; \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql; \
     docker-php-ext-configure bcmath --enable-bcmath; \
     docker-php-ext-configure intl --enable-intl; \
-    pecl install apcu; \
-    docker-php-ext-enable apcu; \
     docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
     \
     git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
@@ -71,7 +69,7 @@ RUN set -ex; \
     ./configure;  \
     make;  \
     make install; \
-    make test; \
+    #make test; \
     \
     git clone --branch ${PHP_REDIS_VERSION} https://github.com/phpredis/phpredis /tmp/phpredis; \
     cd /tmp/phpredis; \
@@ -130,6 +128,9 @@ RUN runDeps="$( \
 # iconv运行库
 RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
+
+RUN pecl install apcu; \
+    docker-php-ext-enable apcu
 
 # Copy configuration
 COPY config/php.ini $PHP_INI_DIR
