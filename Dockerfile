@@ -67,9 +67,9 @@ RUN set -ex; \
     \
     # 安装APCu
     pecl install apcu; \
-    docker-php-ext-enable apcu
-    
-RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
+    docker-php-ext-enable apcu; \
+    \
+    git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
     cd build; \
