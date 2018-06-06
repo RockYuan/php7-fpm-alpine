@@ -54,18 +54,17 @@ RUN set -ex; \
     docker-php-ext-configure bcmath --enable-bcmath; \
     docker-php-ext-configure intl --enable-intl; \
     \
-    docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
-    \
-    runDeps="$( \
+    docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv
+    
+RUN runDeps="$( \
         scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
             | tr ',' '\n' \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
     )"; \
-    \
-    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick; \
-    \
-    git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
+    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick
+
+RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
     cd build; \
