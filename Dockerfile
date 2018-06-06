@@ -127,11 +127,8 @@ RUN set -ex; \
     # 建立默认工作目录
     mkdir -p /data
 
-# 安装APCu扩展 & iconv运行库
-RUN pecl install apcu; \
-    docker-php-ext-enable apcu; \
-    \
-    apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+# iconv运行库
+RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Copy configuration
