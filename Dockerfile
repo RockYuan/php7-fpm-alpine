@@ -59,6 +59,9 @@ RUN docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl
 # RUN docker-php-ext-install mcrypt
 
 RUN docker-php-ext-install opcache sockets iconv
+
+RUN pecl install apcu; \
+    docker-php-ext-enable apcu;
     
 RUN set -ex; \
     \
