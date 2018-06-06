@@ -65,10 +65,6 @@ RUN set -ex; \
     \
     apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick; \
     \
-    # 安装APCu
-    pecl install apcu; \
-    docker-php-ext-enable apcu; \
-    \
     git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
@@ -121,6 +117,10 @@ RUN set -ex; \
     git clone --branch ${PHP_XDEBUG_VERSION} https://github.com/xdebug/xdebug.git /tmp/php-xdebug; \
     docker-php-ext-configure /tmp/php-xdebug; \
     docker-php-ext-install /tmp/php-xdebug; \
+    \
+    # 安装APCu
+    pecl install apcu; \
+    docker-php-ext-enable apcu; \
     \
     # 系统时间
     cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime; \
