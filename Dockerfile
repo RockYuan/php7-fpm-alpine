@@ -24,9 +24,9 @@ ENV PHPIZE_DEPS \
     re2c
 
 # 安装需要的插件
-RUN set -ex
-
-RUN apk add --no-cache --virtual .build-deps \
+RUN set -ex; \
+    \
+    apk add --no-cache --virtual .build-deps \
         ${PHPIZE_DEPS} \
         # for gd extension
         freetype-dev \
@@ -34,36 +34,27 @@ RUN apk add --no-cache --virtual .build-deps \
         libpng-dev \
         # for intl extension
         icu-dev \
-        # for mcrypt extension
-        libmcrypt-dev \
         # for memcached
         libmemcached-dev \
         zlib-dev \
         cyrus-sasl-dev \
         # for swoole
         linux-headers \
+        # for mcrypt extension DEPRECATED since PHP 7.1
+        #libmcrypt-dev \
         # for ...
         openssl-dev \
         libtool \
-        tzdata
-
-RUN apk add imagemagick-dev --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted
-
-RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-png-dir=/usr --with-jpeg-dir=/usr; \
+        tzdata; \
+    \
+    apk add imagemagick-dev --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted; \
+    \
+    docker-php-ext-configure gd --with-freetype-dir=/usr --with-png-dir=/usr --with-jpeg-dir=/usr; \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql; \
     docker-php-ext-configure bcmath --enable-bcmath; \
-    docker-php-ext-configure intl --enable-intl
-    
-RUN docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl
-
-# RUN docker-php-ext-install mcrypt
-
-RUN docker-php-ext-install opcache sockets iconv
-
-RUN pecl install apcu; \
-    docker-php-ext-enable apcu
-    
-RUN set -ex; \
+    docker-php-ext-configure intl --enable-intl; \
+    \
+    docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
     \
     runDeps="$( \
         scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
@@ -72,9 +63,13 @@ RUN set -ex; \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
     )"; \
     \
-    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick
-
-RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
+    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick; \
+    \
+    # 安装APCu
+    pecl install apcu; \
+    docker-php-ext-enable apcu; \
+    \
+    git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
     cd build; \
@@ -113,22 +108,19 @@ RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.
     docker-php-ext-install /tmp/php-memcached; \
     \
     # 安装imagick
-    # pecl install imagick-${PHP_IMAGICK_VERSION}; \
-    # docker-php-ext-enable imagick; \
     git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
     docker-php-ext-configure /tmp/php-imagick; \
     docker-php-ext-install /tmp/php-imagick; \
     \
     # 安装swoole
-    # pecl install swoole-${PHP_SWOOLE_VERSION}; \
-    # docker-php-ext-enable swoole; \
     git clone --branch ${PHP_SWOOLE_VERSION} https://github.com/swoole/swoole-src.git /tmp/php-swoole; \
     docker-php-ext-configure /tmp/php-swoole; \
     docker-php-ext-install /tmp/php-swoole; \
     \
-    # 开发环境启用xdebug
-    # pecl install xdebug-${PHP_XDEBUG_VERSION}; \
-    # docker-php-ext-enable xdebug; \
+    # iconv运行库
+    apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
+    \
+    # 开发环境启用xdebug,现网不需要
     git clone --branch ${PHP_XDEBUG_VERSION} https://github.com/xdebug/xdebug.git /tmp/php-xdebug; \
     docker-php-ext-configure /tmp/php-xdebug; \
     docker-php-ext-install /tmp/php-xdebug; \
@@ -142,20 +134,13 @@ RUN git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.
     # 建立默认工作目录
     mkdir -p /data
 
-RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Copy configuration
-#COPY config/fpm/php-fpm.conf /usr/local/etc/
-#COPY config/fpm/pool.d /usr/local/etc/pool.d
-#COPY config/php.ini $PHP_INI_DIR
+COPY config/php.ini $PHP_INI_DIR
 COPY config/amqp.ini $PHP_INI_DIR/conf.d/
 COPY config/redis.ini $PHP_INI_DIR/conf.d/
 COPY config/mongodb.ini $PHP_INI_DIR/conf.d/
-# 生产现网利用opcache中间代码复用加速,开发环境注释
-#COPY config/opcache.ini $PHP_INI_DIR/conf.d/
-# 开发环境启用xdebug,现网环境注释
-#COPY config/xdebug.ini $PHP_INI_DIR/conf.d/
 # 根据系统环境变量修改命令行提示
 COPY config/env_prompt.sh /etc/profile.d/env_prompt.sh
 ENV ENV="/etc/profile"
