@@ -53,19 +53,9 @@ RUN set -ex; \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql; \
     docker-php-ext-configure bcmath --enable-bcmath; \
     docker-php-ext-configure intl --enable-intl; \
-    \
     pecl install apcu; \
     docker-php-ext-enable apcu; \
-    \
     docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
-    \
-    runDeps="$( \
-        scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
-            | tr ',' '\n' \
-            | sort -u \
-            | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-    )"; \
-    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick; \
     \
     git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
@@ -128,6 +118,14 @@ RUN set -ex; \
     rm -rf /tmp/*; \
     # 建立默认工作目录
     mkdir -p /data
+
+RUN runDeps="$( \
+        scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
+            | tr ',' '\n' \
+            | sort -u \
+            | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+    )"; \
+    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick
 
 # iconv运行库
 RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
