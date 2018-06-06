@@ -118,10 +118,6 @@ RUN set -ex; \
     docker-php-ext-configure /tmp/php-xdebug; \
     docker-php-ext-install /tmp/php-xdebug; \
     \
-    # 安装APCu
-    pecl install apcu; \
-    docker-php-ext-enable apcu; \
-    \
     # 系统时间
     cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime; \
     echo "Asia/Hong_Kong" >  /etc/timezone; \
@@ -131,7 +127,11 @@ RUN set -ex; \
     # 建立默认工作目录
     mkdir -p /data
 
-RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+# 安装APCu扩展 & iconv运行库
+RUN pecl install apcu; \
+    docker-php-ext-enable apcu; \
+    \
+    apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Copy configuration
