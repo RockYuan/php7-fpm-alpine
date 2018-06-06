@@ -93,11 +93,6 @@ RUN set -ex; \
     docker-php-ext-configure /tmp/php-memcached; \
     docker-php-ext-install /tmp/php-memcached; \
     \
-    # 安装imagick
-    git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
-    docker-php-ext-configure /tmp/php-imagick; \
-    docker-php-ext-install /tmp/php-imagick; \
-    \
     # 安装swoole
     git clone --branch ${PHP_SWOOLE_VERSION} https://github.com/swoole/swoole-src.git /tmp/php-swoole; \
     docker-php-ext-configure /tmp/php-swoole; \
@@ -123,7 +118,12 @@ RUN runDeps="$( \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
     )"; \
-    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 vim imagemagick
+    apk add --virtual .phpexts-rundeps libmemcached-libs libssl1.0 vim imagemagick
+
+# 安装imagick
+RUN git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
+    docker-php-ext-configure /tmp/php-imagick; \
+    docker-php-ext-install /tmp/php-imagick
 
 # iconv运行库
 RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
