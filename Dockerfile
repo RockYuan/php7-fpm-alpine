@@ -55,6 +55,15 @@ RUN set -ex; \
     docker-php-ext-configure intl --enable-intl; \
     docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
     \
+    apk add --virtual .phpexts-rundeps libmemcached-libs libssl1.0 imagemagick vim; \
+    \
+    git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
+    docker-php-ext-configure /tmp/php-imagick; \
+    docker-php-ext-install /tmp/php-imagick; \
+    \
+    pecl install apcu; \
+    docker-php-ext-enable apcu; \
+    \
     git clone --branch ${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq; \
     cd /tmp/rabbitmq; \
     mkdir build; \
@@ -107,30 +116,30 @@ RUN set -ex; \
     cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime; \
     echo "Asia/Hong_Kong" >  /etc/timezone; \
     \
-    #apk del .build-deps; \
+    apk del .build-deps; \
     rm -rf /tmp/*; \
     # 建立默认工作目录
     mkdir -p /data
 
-RUN runDeps="$( \
-        scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
-            | tr ',' '\n' \
-            | sort -u \
-            | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-    )"; \
-    apk add --virtual .phpexts-rundeps libmemcached-libs libssl1.0 vim imagemagick
+# RUN runDeps="$( \
+#         scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
+#             | tr ',' '\n' \
+#             | sort -u \
+#             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+#     )"; \
+#     apk add --virtual .phpexts-rundeps libmemcached-libs libssl1.0 vim imagemagick
 
 # 安装imagick
-RUN git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
-    docker-php-ext-configure /tmp/php-imagick; \
-    docker-php-ext-install /tmp/php-imagick
+# RUN git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
+#     docker-php-ext-configure /tmp/php-imagick; \
+#     docker-php-ext-install /tmp/php-imagick
 
 # iconv运行库
 RUN apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
-RUN pecl install apcu; \
-    docker-php-ext-enable apcu
+# RUN pecl install apcu; \
+#     docker-php-ext-enable apcu
 
 # Copy configuration
 COPY config/php.ini $PHP_INI_DIR
