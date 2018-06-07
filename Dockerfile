@@ -107,7 +107,7 @@ RUN set -ex; \
     cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime; \
     echo "Asia/Hong_Kong" >  /etc/timezone; \
     \
-    apk del .build-deps; \
+    #apk del .build-deps; \
     rm -rf /tmp/*; \
     # 建立默认工作目录
     mkdir -p /data
