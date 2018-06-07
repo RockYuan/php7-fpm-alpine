@@ -55,7 +55,13 @@ RUN set -ex; \
     docker-php-ext-configure intl --enable-intl; \
     docker-php-ext-install gd pdo_mysql mysqli zip bcmath intl opcache sockets iconv; \
     \
-    apk add --virtual .phpexts-rundeps libmemcached-libs libssl1.0 imagemagick vim; \
+    runDeps="$( \
+        scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
+            | tr ',' '\n' \
+            | sort -u \
+            | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+    )"; \
+    apk add --virtual .phpexts-rundeps $runDeps libmemcached-libs libssl1.0 imagemagick vim; \
     \
     git clone --branch ${PHP_IMAGICK_VERSION} https://github.com/mkoppanen/imagick.git /tmp/php-imagick; \
     docker-php-ext-configure /tmp/php-imagick; \
